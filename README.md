@@ -18,3 +18,4 @@ A Flutter app with Supabase authentication built from scratch. This app serves a
     SUPABASE_ANON_KEY
     FLASK_BACKEND_URL
     PEXELS_API_KEY
+test
