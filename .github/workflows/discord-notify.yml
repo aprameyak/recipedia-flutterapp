@@ -15,9 +15,10 @@ jobs:
         
       - name: Send Discord notification
         uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_NOTIFY }}
         with:
-          webhook: ${{ secrets.DISCORD_NOTIFY }}
-          message: |
+          args: |
             New push to ${{ github.repository }}
             
             Author: ${{ github.actor }}
