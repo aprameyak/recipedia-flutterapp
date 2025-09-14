@@ -18,20 +18,57 @@ jobs:
 
       - name: Set up SSH
         run: |
+          echo "Setting up SSH connection..."
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.ORACLE_HOST }} >> ~/.ssh/known_hosts
+          echo "SSH setup complete"
 
       - name: Deploy Backend
         run: |
+          echo "Starting deployment to Oracle server..."
           ssh -i ~/.ssh/id_ed25519 ${{ secrets.ORACLE_USER }}@${{ secrets.ORACLE_HOST }} << 'EOF'
             set -e
+            echo "Connected to Oracle server"
+            
+            echo "Navigating to app directory: ${{ secrets.APP_DIR }}"
             cd ${{ secrets.APP_DIR }}
+            
+            echo "Pulling latest code from git"
             git pull origin main
+            echo "Git pull completed"
+            
+            echo "Entering backend directory"
             cd backend
+            
+            echo "Setting run.sh permissions"
             chmod +x run.sh
+            
+            echo "Stopping existing Flask app"
             screen -S flaskapp -X quit || true
+            
+            echo "Starting new Flask app in screen session"
             screen -S flaskapp -dm bash ./run.sh
+            
+            echo "Deployment commands completed"
+          EOF
+          echo "Deployment finished"
+
+      - name: Verify Deployment
+        run: |
+          echo "Verifying deployment status..."
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.ORACLE_USER }}@${{ secrets.ORACLE_HOST }} << 'EOF'
+            echo "Checking screen sessions"
+            screen -list
+            
+            echo "Checking if Flask process is running"
+            if pgrep -f "python" > /dev/null; then
+              echo "Python process found"
+            else
+              echo "No Python process found"
+            fi
+            
+            echo "Verification complete"
           EOF
              
