@@ -56,5 +56,4 @@ linux/.dart_tool/
 .DS_Store
 __pycache__/
 
-#mongodb connection string
 **.env

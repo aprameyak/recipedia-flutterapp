@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:cooking_app/pages/reg.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:math'; // For Random()
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // For dotenv
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginPage extends StatefulWidget {
@@ -11,6 +13,105 @@ class LoginPage extends StatefulWidget {
 
   @override
   State<LoginPage> createState() => _LoginPageState();
+}
+
+//App selects a random background from unsplash upon opening the app
+class _BackgroundRNG extends StatefulWidget {
+  final Widget child;
+  const _BackgroundRNG({required this.child});
+
+  @override
+  _BackgroundRNGState createState() => _BackgroundRNGState();
+}
+
+class _BackgroundRNGState extends State<_BackgroundRNG> {
+  late Future<String> _imageUrlFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    //Loads the image url BEFORE the build()
+    //Goes constructor, createState(), initState(), build()
+    _imageUrlFuture = fetchRandomImageUrl('food');
+    debugPrint("Background image url loaded");
+  }
+
+  Future<String> fetchRandomImageUrl(String query) async {
+    final apiKey = dotenv.env['PEXELS_API'];
+    final url = Uri.parse(
+      'https://api.pexels.com/v1/search?query=$query&per_page=30',
+    );
+    final response = await http.get(url, headers: {'Authorization': apiKey!});
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      final List photos = json['photos'];
+      final randomPhoto = photos[Random().nextInt(photos.length)];
+      debugPrint('Pexels response: ${response.statusCode}');
+      return randomPhoto['src']['original'];
+    } else {
+      debugPrint('Pexels error: ${response.statusCode}');
+      throw Exception('Failed to fetch image');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return FutureBuilder<String>(
+      future: _imageUrlFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError || !snapshot.hasData) {
+          return Container(color: Colors.white, child: widget.child);
+        } else {
+          final imageUrl = snapshot.data!;
+          return Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: NetworkImage(imageUrl),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withValues(alpha: 0.4), // Slightly darker base
+                  BlendMode.darken,
+                ),
+              ),
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.0, 0.4, 0.7, 1.0], // Adjusted fade points
+                  colors: [
+                    Colors.transparent, // Top: show image
+                    Colors.black.withValues(alpha: 0.1), // Light fade starts
+                    Colors.black.withValues(alpha: 0.7), // Stronger fade
+                    Colors.black.withValues(
+                      alpha: 0.95,
+                    ), // Almost completely black
+                  ],
+                ),
+              ),
+              child: Column(
+                children: [
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.all(screenWidth * 0.08),
+                      child: widget.child,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
 }
 
 class _LoginPageState extends State<LoginPage> {
@@ -70,62 +171,97 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            TextField(
-              controller: _email,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                hintText: 'Enter your email',
+    return _BackgroundRNG(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          title: const Text('Login', style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ListView(
+            children: [
+              TextField(
+                controller: _email,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  labelStyle: TextStyle(color: Colors.white70),
+                  hintText: 'Enter your email',
+                  hintStyle: TextStyle(color: Colors.white54),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white54),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                ),
+                keyboardType: TextInputType.emailAddress,
+                autocorrect: false,
+                enableSuggestions: false,
               ),
-              keyboardType: TextInputType.emailAddress,
-              autocorrect: false,
-              enableSuggestions: false,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _password,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                hintText: 'Enter your password',
+              const SizedBox(height: 16),
+              TextField(
+                controller: _password,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Password',
+                  labelStyle: TextStyle(color: Colors.white70),
+                  hintText: 'Enter your password',
+                  hintStyle: TextStyle(color: Colors.white54),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white54),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                ),
+                obscureText: true,
+                enableSuggestions: false,
+                autocorrect: false,
               ),
-              obscureText: true,
-              enableSuggestions: false,
-              autocorrect: false,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _isLoading ? null : login,
-              child: _isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text("Login"),
-            ),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: _isLoading
-                  ? null
-                  : () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const Reg()),
-                    ),
-              child: const Text("Don't have an account? Sign Up"),
-            ),
-            TextButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const Reset()),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _isLoading ? null : login,
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text(
+                        "Login",
+                        style: TextStyle(color: Colors.black),
+                      ),
               ),
-              child: const Text("Forgot Password?"),
-            ),
-          ],
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: _isLoading
+                    ? null
+                    : () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const Reg()),
+                      ),
+                child: const Text(
+                  "Don't have an account? Sign Up",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Reset()),
+                ),
+                child: const Text(
+                  "Forgot Password?",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
