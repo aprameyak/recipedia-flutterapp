@@ -2,17 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:cooking_app/pages/login.dart';
 import 'package:cooking_app/pages/home.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 class AuthGate extends StatelessWidget {
-
-  @override
-  void initState() {
-
-  }
-
   Future<void> sendDataToBackend(Map<String, dynamic> data) async {
-    final accessToken = Supabase.instance.client.auth.currentSession?.accessToken;
+    final accessToken =
+        Supabase.instance.client.auth.currentSession?.accessToken;
     if (accessToken == null) return;
 
     final response = await http.get(
@@ -23,9 +18,9 @@ class AuthGate extends StatelessWidget {
       },
     );
     if (response.statusCode == 200) {
-      print("Profile loaded successfully");
+      debugPrint("Profile loaded successfully");
     } else {
-      print("Failed: ${response.statusCode}");
+      debugPrint("Failed: ${response.statusCode}");
     }
   }
 

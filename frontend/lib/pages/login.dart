@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:cooking_app/pages/reg.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:math'; // For Random()
-import 'package:flutter_dotenv/flutter_dotenv.dart'; // For dotenv
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:math';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,7 +15,7 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-//App selects a random background from unsplash upon opening the app
+//App selects a random background from pexel upon opening the app
 class _BackgroundRNG extends StatefulWidget {
   final Widget child;
   const _BackgroundRNG({required this.child});
@@ -30,8 +30,6 @@ class _BackgroundRNGState extends State<_BackgroundRNG> {
   @override
   void initState() {
     super.initState();
-    //Loads the image url BEFORE the build()
-    //Goes constructor, createState(), initState(), build()
     _imageUrlFuture = fetchRandomImageUrl('food');
     debugPrint("Background image url loaded");
   }
@@ -74,7 +72,7 @@ class _BackgroundRNGState extends State<_BackgroundRNG> {
                 image: NetworkImage(imageUrl),
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
-                  Colors.black.withValues(alpha: 0.4), // Slightly darker base
+                  Colors.black.withValues(alpha: 0.85),
                   BlendMode.darken,
                 ),
               ),
@@ -84,23 +82,35 @@ class _BackgroundRNGState extends State<_BackgroundRNG> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  stops: const [0.0, 0.4, 0.7, 1.0], // Adjusted fade points
+                  stops: const [0.0, 0.4, 0.7, 1.0],
                   colors: [
-                    Colors.transparent, // Top: show image
-                    Colors.black.withValues(alpha: 0.1), // Light fade starts
-                    Colors.black.withValues(alpha: 0.7), // Stronger fade
-                    Colors.black.withValues(
-                      alpha: 0.95,
-                    ), // Almost completely black
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.1),
+                    Colors.black.withValues(alpha: 0.7),
+                    Colors.black.withValues(alpha: 0.95),
                   ],
                 ),
               ),
               child: Column(
                 children: [
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.26),
+                  Text(
+                    "Recipedia",
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: 60,
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   Expanded(
                     child: Padding(
-                      padding: EdgeInsets.all(screenWidth * 0.08),
+                      padding: EdgeInsets.only(
+                        left: screenWidth * 0.08,
+                        right: screenWidth * 0.08,
+                        top: screenWidth * 0.03,
+                        bottom: screenWidth * 0.03,
+                      ),
                       child: widget.child,
                     ),
                   ),
@@ -179,6 +189,7 @@ class _LoginPageState extends State<LoginPage> {
           title: const Text('Login', style: TextStyle(color: Colors.white)),
           backgroundColor: Colors.transparent,
           elevation: 0,
+          automaticallyImplyLeading: false,
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -246,7 +257,7 @@ class _LoginPageState extends State<LoginPage> {
                         MaterialPageRoute(builder: (context) => const Reg()),
                       ),
                 child: const Text(
-                  "Don't have an account? Sign Up",
+                  "Don't have an account? Sign up",
                   style: TextStyle(color: Colors.white),
                 ),
               ),

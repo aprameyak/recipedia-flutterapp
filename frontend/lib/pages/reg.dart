@@ -84,7 +84,10 @@ class RegPageState extends State<Reg> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Register')),
+      appBar: AppBar(
+        title: const Text('Create Account'),
+        automaticallyImplyLeading: false,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
@@ -127,7 +130,7 @@ class RegPageState extends State<Reg> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text("Register"),
+                  : const Text("Create Account"),
             ),
             const SizedBox(height: 12),
             TextButton(

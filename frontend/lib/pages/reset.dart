@@ -40,35 +40,42 @@ class _ResetState extends State<Reset> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        children: [
-          TextField(
-            controller: _email,
-            decoration: const InputDecoration(labelText: 'Username'),
-          ),
-          TextField(
-            controller: _newPass,
-            decoration: const InputDecoration(labelText: "New Password"),
-          ),
-          TextField(
-            controller: _confirm,
-            decoration: const InputDecoration(
-              labelText: "Confirm New Password",
+      appBar: AppBar(
+        title: const Text('Reset Password'),
+        automaticallyImplyLeading: false,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          children: [
+            TextField(
+              controller: _email,
+              decoration: const InputDecoration(labelText: 'Username'),
             ),
-          ),
-          ElevatedButton(
-            onPressed: reset,
-            child: const Text("Change Password"),
-          ),
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const LoginPage()),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _newPass,
+              decoration: const InputDecoration(labelText: "New Password"),
             ),
-            child: const Center(child: Text("Go Back")),
-          ),
-        ],
+            const SizedBox(height: 16),
+            TextField(
+              controller: _confirm,
+              decoration: const InputDecoration(
+                labelText: "Confirm New Password",
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: reset,
+              child: const Text("Reset Password"),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Center(child: Text("Back to Login")),
+            ),
+          ],
+        ),
       ),
     );
   }
