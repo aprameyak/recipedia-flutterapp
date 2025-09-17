@@ -1,9 +1,8 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:cooking_app/widgets/main_scaffold_with_bottom_navbar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:cooking_app/widgets/main_scaffold_with_bottom_navbar.dart';
 
 //Do sendDataToBackend with map of changes (feed of ~20 recipes) when opening the home page
 class HomePage extends StatefulWidget {
@@ -12,185 +11,277 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-//App's frosted glowing card on top of the random background
-class ScrollableFrostedCard extends StatelessWidget {
-  const ScrollableFrostedCard({super.key});
+class HomeApp extends StatelessWidget {
+  const HomeApp({super.key});
 
-  Widget _buildCategoryItem(String title, String imageUrl, double screenWidth) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CircleAvatar(
-          radius: screenWidth * 0.06,
-          backgroundImage: NetworkImage(imageUrl),
-          backgroundColor: Colors.black,
-        ),
-        SizedBox(height: screenWidth * 0.01),
-        Text(
-          title,
-          style: GoogleFonts.lato(
-            color: Colors.black,
-            fontSize: screenWidth * 0.03,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(debugShowCheckedModeBanner: false, home: const Home());
+  }
+}
+
+class Home extends StatefulWidget {
+  const Home({super.key});
+
+  @override
+  State<Home> createState() => _Home();
+}
+
+class _Home extends State<Home> {
+  final CarouselController controller = CarouselController(initialItem: 1);
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final screenHeight = size.height;
-    final screenWidth = size.width;
-    debugPrint('Screen Width: ${size.width}, Screen Height: ${size.height}');
-
-    return Center(
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Glow layer behind the card
-          Container(
-            width: screenWidth * 0.95,
-            height: screenHeight * 0.5,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.yellow.withValues(alpha: 0.3),
-                  blurRadius: 60,
-                  spreadRadius: 20,
-                ),
-              ],
-            ),
-          ),
-
-          // Frosted glass scrollable card
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                width: double.infinity,
-                constraints: BoxConstraints(maxHeight: screenHeight * 0.5),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.3),
-                  ),
-                ),
-                padding: EdgeInsets.symmetric(
-                  horizontal: screenWidth * 0.04,
-                  vertical: screenHeight * 0.025,
-                ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Featured Recipes:",
-                        style: GoogleFonts.truculenta(
-                          fontSize: screenWidth * 0.06,
-                          color: Colors.blue,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: screenHeight * 0.02),
-                      Text(
-                        "Explore by category or diet:",
-                        style: GoogleFonts.truculenta(
-                          fontSize: screenWidth * 0.05,
-                          color: Colors.blueGrey,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: screenHeight * 0.02),
-                      Wrap(
-                        spacing: screenWidth * 0.02,
-                        runSpacing: screenHeight * 0.01,
-                        alignment: WrapAlignment.center,
-                        children: [
-                          _buildCategoryItem(
-                            "Desserts",
-                            'https://zhangcatherine.com/wp-content/uploads/2022/09/dog-cake.jpg',
-                            screenWidth,
-                          ),
-                          _buildCategoryItem(
-                            "Proteins",
-                            'https://static01.nyt.com/images/2024/05/16/multimedia/fs-tandoori-chicken-hmjq/fs-tandoori-chicken-hmjq-mediumSquareAt3X.jpg',
-                            screenWidth,
-                          ),
-                          _buildCategoryItem(
-                            "Drinks",
-                            'https://static.vecteezy.com/system/resources/thumbnails/049/110/238/small_2x/close-up-of-colorful-refreshing-drinks-with-ice-cubes-and-bubbles-perfect-for-summer-and-party-themes-photo.jpeg',
-                            screenWidth,
-                          ),
-                          _buildCategoryItem(
-                            "Luxurious",
-                            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNt7pl88JtgGQ_9zUPouLb8Va_WOl4bkZJPg&s',
-                            screenWidth,
-                          ),
-                          _buildCategoryItem(
-                            "Carbs",
-                            'https://assets.clevelandclinic.org/transform/40f5393d-e6d3-4968-90f2-cbd894b67779/wholeGrainProducts-842797430-770x533-1_jpg',
-                            screenWidth,
-                          ),
-                          _buildCategoryItem(
-                            "Cheap & Fast",
-                            'https://static.vecteezy.com/system/resources/thumbnails/002/454/867/small_2x/chronometer-timer-counter-isolated-icon-free-vector.jpg',
-                            screenWidth,
-                          ),
-                          _buildCategoryItem(
-                            "Random Recipe",
-                            'https://png.pngtree.com/png-vector/20190329/ourmid/pngtree-vector-shuffle-icon-png-image_889552.jpg',
-                            screenWidth,
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: screenHeight * 0.03),
-                      Divider(color: Colors.black, thickness: 2),
-                      SizedBox(height: screenHeight * 0.02),
-                      Text(
-                        "Your friends' dishes:",
-                        style: GoogleFonts.truculenta(
-                          fontSize: screenWidth * 0.05,
-                          color: Colors.blueGrey,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: screenHeight * 0.02),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: List.generate(
-                          10,
-                          (i) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: Text(
-                              "Recipe ${i + 1}: [Insert name, content, and initial image posting of recipe here]",
-                              style: GoogleFonts.lato(
-                                fontSize: screenWidth * 0.04,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+    return MainScaffold(
+      currentIndex: 0,
+      body: Container(
+        color: const Color.fromARGB(255, 252, 251, 248),
+        child: ListView(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsetsDirectional.only(top: 35.0, start: 50.0),
+              child: Text(
+                "Good ${"[time period]"}, Chef ${"[user]!"}",
+                style: GoogleFonts.inter(
+                  fontSize: 50,
+                  decoration: TextDecoration.none,
+                  fontWeight: FontWeight.w800,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
-          ),
-        ],
+            Padding(
+              padding: EdgeInsetsDirectional.only(top: 15.0, start: 50.0),
+              child: Text(
+                'What would you like to cook today?',
+                style: GoogleFonts.inter(
+                  fontSize: 30,
+                  color: Color.fromARGB(255, 108, 107, 107),
+                  decoration: TextDecoration.none,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsetsDirectional.only(top: 55.0, start: 50.0),
+              child: Text(
+                'Browse by Category',
+                style: GoogleFonts.inter(
+                  fontSize: 30,
+                  color: Colors.black,
+                  decoration: TextDecoration.none,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsetsDirectional.only(
+                top: 30,
+                start: 50.0,
+                end: 50.0,
+              ),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 140),
+                child: CarouselView.weighted(
+                  flexWeights: const <int>[2, 2, 2, 2, 2, 2],
+                  consumeMaxWeight: false,
+                  children: CategoryInfo.values.map((CategoryInfo info) {
+                    return Container(
+                      margin: EdgeInsets.all(5),
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(
+                          color: switch (info.label) {
+                            'Breakfast' => Color(0xFFC62828),
+                            'Lunch' => Color(0xFFAD1457),
+                            'Dinner' => Color(0xFF6A1B9A),
+                            'Desserts' => Color(0xFF4527A0),
+                            'Proteins' => Color(0xFF283593),
+                            'Carbs' => Color(0xFF1565C0),
+                            'Vegetarian' => Color(0xFF0277BD),
+                            'Drinks' => Color(0xFF00838F),
+                            'Healthy' => Color(0xFF00695C),
+                            'Keto' => Color(0xFF2E7D32),
+                            'Recent' => Color(0xFF558B2F),
+                            'Calorie Friendly' => Color(0xFF9E9D24),
+                            'Fine Dining' => Color(0xFFF57F17),
+                            'Cheap & Fast' => Color(0xFFEF6C00),
+                            'Random' => Color(0xFFD84315),
+                            _ => Color(0x00000000),
+                          },
+                          width: 1,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Container(
+                              decoration: BoxDecoration(
+                                color: switch (info.label) {
+                                  'Breakfast' => Color(0xFFFFCDD2),
+                                  'Lunch' => Color(0xFFF8BBD9),
+                                  'Dinner' => Color(0xFFE1BEE7),
+                                  'Desserts' => Color(0xFFD1C4E9),
+                                  'Proteins' => Color(0xFFC5CAE9),
+                                  'Carbs' => Color(0xFFBBDEFB),
+                                  'Vegetarian' => Color(0xFFB3E5FC),
+                                  'Drinks' => Color(0xFFB2EBF2),
+                                  'Healthy' => Color(0xFFB2DFDB),
+                                  'Keto' => Color(0xFFC8E6C9),
+                                  'Recent' => Color(0xFFDCEDC8),
+                                  'Calorie Friendly' => Color(0xFFF0F4C3),
+                                  'Fine Dining' => Color(0xFFFFF9C4),
+                                  'Cheap & Fast' => Color(0xFFFFE0B2),
+                                  'Random' => Color(0xFFFFCCBC),
+                                  _ => Color(0xFF808080),
+                                },
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                info.recipeCount,
+                                style: TextStyle(
+                                  color: switch (info.label) {
+                                    'Breakfast' => Color(0xFFC62828),
+                                    'Lunch' => Color(0xFFAD1457),
+                                    'Dinner' => Color(0xFF6A1B9A),
+                                    'Desserts' => Color(0xFF4527A0),
+                                    'Proteins' => Color(0xFF283593),
+                                    'Carbs' => Color(0xFF1565C0),
+                                    'Vegetarian' => Color(0xFF0277BD),
+                                    'Drinks' => Color(0xFF00838F),
+                                    'Healthy' => Color(0xFF00695C),
+                                    'Keto' => Color(0xFF2E7D32),
+                                    'Recent' => Color(0xFF558B2F),
+                                    'Calorie Friendly' => Color(0xFF9E9D24),
+                                    'Fine Dining' => Color(0xFFF57F17),
+                                    'Cheap & Fast' => Color(0xFFEF6C00),
+                                    'Random' => Color(0xFFD84315),
+                                    _ => Color(0x00000000),
+                                  },
+                                ),
+                                overflow: TextOverflow.clip,
+                                softWrap: false,
+                              ),
+                            ),
+                            Text(
+                              info.label,
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.clip,
+                              softWrap: false,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsetsDirectional.only(top: 75.0, start: 50.0),
+              child: Text(
+                'Recipes For You',
+                style: GoogleFonts.inter(
+                  fontSize: 30,
+                  color: Colors.black,
+                  decoration: TextDecoration.none,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsetsDirectional.only(
+                top: 20.0,
+                start: 50.0,
+                end: 50.0,
+              ),
+              child: Text("hi"),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _HomePageState extends State<HomePage> {
-  User? get _currentUser => Supabase.instance.client.auth.currentUser;
+enum CategoryInfo {
+  breakfast('Breakfast', '245 recipes'),
+  lunch('Lunch', '245 recipes'),
+  dinner('Dinner', '245 recipes'),
+  desserts('Desserts', '245 recipes'),
+  proteins('Proteins', '245 recipes'),
+  carbs('Carbs', '245 recipes'),
+  vegetarian('Vegetarian', '245 recipes'),
+  drinks('Drinks', '245 recipes'),
+  healthy('Healthy', '245 recipes'),
+  keto('Keto', '245 recipes'),
+  recent('Recent', '245 recipes'),
+  calorieFriendly('Calorie Friendly', '245 recipes'),
+  fineDining('Fine Dining', '245 recipes'),
+  cheapAndFast('Cheap & Fast', '245 recipes'),
+  random('Random', '245 recipes');
 
+  const CategoryInfo(this.label, this.recipeCount);
+  final String label;
+  final String recipeCount;
+}
+
+enum PostInfo {
+  pasta(
+    'Homemade Pasta with Fresh Herbs',
+    'jonathan',
+    'https://images.unsplash.com/photo-1617735605078-8a9336be0816?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZWNpcGUlMjBib29rJTIwZm9vZCUyMHByZXBhcmF0aW9ufGVufDF8fHx8MTc1NzgxOTY4MXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    'Carbs',
+    48,
+    'idk',
+  ),
+  curry(
+    'Spicy Thai Green Curry',
+    'bobby',
+    'https://images.unsplash.com/photo-1647846241734-7c2ab3db1d32?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZWNpcGUlMjBib29rJTIwZm9vZCUyMHByZXBhcmF0aW9ufGVufDF8fHx8MTc1NzgxOTY4MXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    'Vegetarian',
+    46,
+    'idk',
+  ),
+  ratatouille(
+    'Classic French Ratatouille',
+    'remy',
+    'https://images.unsplash.com/photo-1722639096482-4e1a805f9b0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb29kJTIwc2VhcmNoJTIwaW5ncmVkaWVudHN8ZW58MXx8fHwxNzU3ODE5NjgxfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    'Fine Dining',
+    49,
+    'idk',
+  );
+
+  //These fields have to be final
+  const PostInfo(
+    this.title,
+    this.profileId,
+    this.imageUrl,
+    this.category,
+    this.likeCount,
+    this.recipe,
+  );
+  final String title;
+  final String profileId;
+  final String imageUrl;
+  final String category;
+  final int likeCount;
+  final String recipe;
+}
+
+class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
@@ -210,58 +301,14 @@ class _HomePageState extends State<HomePage> {
       },
     );
     if (response.statusCode == 200) {
-      print("Feed loaded successfully");
+      debugPrint("Feed loaded successfully");
     } else {
-      print("Failed: ${response.statusCode}");
+      debugPrint("Failed: ${response.statusCode}");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final screenWidth = size.width;
-    final screenHeight = size.height;
-
-    return MainScaffold(
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: 'Welcome, chef ',
-                  style: TextStyle(
-                    fontSize: screenWidth * 0.05,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.amber,
-                  ),
-                ),
-                TextSpan(
-                  text: '${_currentUser?.email ?? "Guest"}!',
-                  style: TextStyle(
-                    fontSize: screenWidth * 0.05,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.amber,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: screenHeight * 0.01),
-          Text(
-            'Discover and post your favorite recipes!',
-            style: TextStyle(
-              fontSize: screenWidth * 0.035,
-              color: Colors.amber,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          Expanded(child: ScrollableFrostedCard()),
-        ],
-      ),
-      currentIndex: 0,
-    );
+    return HomeApp();
   }
 }

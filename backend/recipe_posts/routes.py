@@ -30,7 +30,7 @@ def post():
         recipe_form = CreateRecipeForm({"title": data.get("title"), "recipe": data.get("recipe"), "images": data.get("images", []), "tags": data.get("tags", []), "categories": data.get("categories", [])})
         if not recipe_form.validate():
             return jsonify({"success": False, "error": recipe_form.errors}), 400
-        post = Post(user_id = user.id, title = recipe_form.title.data, recipe = recipe_form.recipe.data, image_uris = recipe_form.images.data, tagged_profile_ids = recipe_form.tags.data, categories = recipe_form.categories.data, timestamp = current_time(), likes_count = 0)
+        post = Post(profile_id = profile.id, title = recipe_form.title.data, recipe = recipe_form.recipe.data, image_uris = recipe_form.images.data, tagged_profile_ids = recipe_form.tags.data, categories = recipe_form.categories.data, timestamp = current_time(), likes_count = 0)
         #categories will be a dropdown menu
         db.session.add(post)
         db.session.flush()
@@ -88,7 +88,8 @@ def edit_post(post_id):
         post = Post.query.get(post_id)
         if not post:
             return jsonify({"success": False, "error": "post not found"}), 404
-        if post.user_id != user.id:
+        profile = get_or_create_profile(user)
+        if post.profile_id != profile.id:
             return jsonify({"success": False, "error": "unauthorized buddy"}), 400
         post.title = recipe_form.title.data
         post.recipe = recipe_form.recipe.data
@@ -109,7 +110,8 @@ def delete_post(post_id):
     post = Post.query.get(post_id)
     if not post:
         return jsonify({"success": False, "error": "post not found"}), 404
-    if post.user_id != user.id:
+    profile = get_or_create_profile(user)
+    if post.profile_id != profile.id:
         return jsonify({"success": False, "error": "unauthorized buddy"}), 400
     db.session.delete(post)
     db.session.commit()
@@ -124,13 +126,13 @@ def toggle_like_on_post(post_id):
     post = Post.query.get(post_id)
     if not post:
         return jsonify({"success": False, "error": "post not found"}), 404
-    if post.user_id == user.id:
+    if post.profile_id == profile.id:
         return jsonify({"success": False, "error": "im crine bro liked his own post😹😹😹 --> not allowed here"}), 400
     if profile.has_liked_post(post):
         profile.like_post(post)
         previous_notif = Notification.query.filter_by(message = f"{profile.username} liked your post!").first()
         if not previous_notif:
-            notif = Notification(notified_id = post.user.profile.id, post_id = post.id, type = "liked_post", message = f"{profile.username} liked your post!", timestamp = current_time())
+            notif = Notification(notified_id = post.profile_id, post_id = post.id, type = "liked_post", message = f"{profile.username} liked your post!", timestamp = current_time())
             db.session.add(notif)
             db.session.commit()
     else:
@@ -164,7 +166,7 @@ def comment(post_id):
             return jsonify({"success": False, "error": comment_form.errors}), 400
         profile.comment_on_post(post, data.get("content"))
         #don't care about spam comments, each one is unique
-        notif = Notification(notified_id = post.user.profile.id, post_id = post.id, type = "new_comment", message = f"{profile.username} commented on your post!", timestamp = current_time())
+        notif = Notification(notified_id = post.profile_id, post_id = post.id, type = "new_comment", message = f"{profile.username} commented on your post!", timestamp = current_time())
         db.session.add(notif)
         db.session.commit()
         return jsonify({"success": True, "comment": comment.to_dict()}), 200
@@ -212,7 +214,7 @@ def delete_comment(post_id, comment_id):
     if not user:
         return jsonify({"success": False, "error": "User not found"}), 404
     profile = get_or_create_profile(user)
-    profile.delete_comment_on_post(comment_id)
+    profile.delete_comment_on_post(comment_id) #handles the case of unauthorization already
     return jsonify({"success": True}), 200
 
 @recipe_posts.route("/posts/<int:post_id>/comments", methods=["GET"])

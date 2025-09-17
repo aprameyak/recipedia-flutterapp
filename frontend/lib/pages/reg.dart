@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+//We need to make this page look a little bit populated
 class Reg extends StatefulWidget {
   const Reg({super.key});
   @override

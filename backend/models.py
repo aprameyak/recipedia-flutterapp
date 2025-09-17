@@ -12,8 +12,7 @@ class User(db.Model):
 class Post(db.Model):
     __tablename__ = 'posts'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.Relationship('User', backref = 'posts', lazy=True) #gives us Post.user and User.posts
+    profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id'), nullable=False)
     title = db.Column(db.String(50))
     recipe = db.Column(db.String(500))
     image_uris = db.Column(db.JSON)
@@ -22,14 +21,14 @@ class Post(db.Model):
     timestamp = db.Column(db.DateTime, default=current_time()) 
 
     def get_share_post_link(self):
-        return f"http://localhost:5000/post/{id}"
+        return f"http://localhost:5000/post/{self.id}"
     
     @property
     def like_count(self):
         return self.liked_by.count()
     
     @property
-    def liked_by(self):
+    def liked_by_profile_list(self):
         return self.liked_by.all()
 
     @property
@@ -57,7 +56,7 @@ class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     notified_id = db.Column(db.Integer, db.ForeignKey('profiles.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
-    post = db.Relationship('Post', backref = 'notifications', lazy=True) #gives us Notification.post and Post.notifications
+    post = db.relationship('Post', backref = 'notifications', lazy=True) #gives us Notification.post and Post.notifications
     notif_type = db.Column(db.String(50)) #Either liked_post, new_post, new_comment, new_follower, tagged_post
     message = db.Column(db.String(200))
     timestamp = db.Column(db.DateTime, default=current_time())
@@ -80,15 +79,12 @@ post_likes = db.Table('post_likes',
 class Profile(db.Model):
     __tablename__ = 'profiles'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.Relationship('User', backref = 'Profile', lazy=True) #gives us Profile.user and User.profile
+    user_id = db.Column(db.String, db.ForeignKey('user.id'))
+    user = db.relationship('User', backref = 'profile', lazy=True) #gives us Profile.user and User.profile
     bio = db.Column(db.String(300))
     username = db.Column(db.String(100))
     profile_picture_uri = db.Column(db.String(255))
-    posts = db.relationship('Post',
-                            primaryjoin='Profile.user_id == Post.user_id',
-                            backref='author',
-                            lazy=True) #gives us Profile.posts and Post.author
+    posts = db.relationship('Post', backref='author', lazy=True) #gives us Profile.posts and Post.author
     notifications = db.relationship('Notification', backref='profile', lazy=True) #gives us Profile.notifications and Notification.profile
     account_created = db.Column(db.DateTime, default=current_time())
     liked_posts = db.relationship('Post', 
@@ -145,4 +141,4 @@ class Profile(db.Model):
 
     def get_share_profile_link(self):
         #TODO change this
-        return f"http://localhost:5000/profile/{id}"
+        return f"http://localhost:5000/profile/{self.id}"

@@ -11,7 +11,7 @@ class AuthGate extends StatelessWidget {
     if (accessToken == null) return;
 
     final response = await http.get(
-      Uri.parse('http://localhost:5000/users/profile'),
+      Uri.parse('http://localhost:5000/profile'),
       headers: {
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',

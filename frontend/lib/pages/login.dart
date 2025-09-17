@@ -72,7 +72,7 @@ class _BackgroundRNGState extends State<_BackgroundRNG> {
                 image: NetworkImage(imageUrl),
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
-                  Colors.black.withValues(alpha: 0.85),
+                  Colors.black.withValues(alpha: 0.70),
                   BlendMode.darken,
                 ),
               ),
@@ -94,6 +94,7 @@ class _BackgroundRNGState extends State<_BackgroundRNG> {
               child: Column(
                 children: [
                   SizedBox(height: MediaQuery.of(context).size.height * 0.26),
+                  //We need someone good at drawing to draw a logo here next to this word
                   Text(
                     "Recipedia",
                     style: GoogleFonts.playfairDisplay(
